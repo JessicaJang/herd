@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# herd-help: list the herd shortcuts in ~/herd/bin.
+set -euo pipefail
+BIN="$(cd "$(dirname "$0")" && pwd)"
+echo "herd shortcuts (in ${BIN/#$HOME/\~}):"
+for f in "$BIN"/herd-*; do
+  [ -x "$f" ] || continue
+  desc="$(sed -n '2s/^# [^:]*: //p' "$f")"
+  printf '  %-16s %s\n' "$(basename "$f")" "$desc"
+done
+echo
+echo "Add one: put an executable script named herd-<name> in herd/bin."
+echo "Line 2 must be: # herd-<name>: <one-line description>"

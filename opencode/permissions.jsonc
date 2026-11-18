@@ -1,0 +1,158 @@
+// herd safety rules for OpenCode.
+//
+// HOW TO USE: set OPENCODE_CONFIG to this file in ~/.profile:
+//   export OPENCODE_CONFIG="$HOME/herd/opencode/permissions.jsonc"
+// Then remove the "permission" block from ~/.config/opencode/opencode.json,
+// so that these rules are the only permission rules.
+//
+// Rule order: general rule first, then exceptions, then denies last.
+// These rules lower the risk. They are not a security boundary.
+// The real fix for a secret is to move it out of a file that agents can reach.
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    // Folders outside the current repo that agents may open.
+    "external_directory": {
+      "*": "ask",
+      "~/herd/**": "allow",
+      "/home/jess/herd/**": "allow",
+      "~/branches/**": "allow",
+      "/home/jess/branches/**": "allow"
+    },
+
+    // Edits: denied, except the paths below.
+    "edit": {
+      "*": "deny",
+      "openspec/**": "allow",
+      "specs/**": "allow",
+      "project.md": "allow",
+      "AGENTS.md": "allow",
+      "src/**": "allow",
+      "tests/**": "allow",
+      "pyproject.toml": "allow",
+      "uv.lock": "allow",
+      ".github/**": "allow",
+      "/home/jess/branches/**": "allow",
+      "/home/jess/herd/**": "allow",
+      "~/herd/**": "allow"
+    },
+
+    // Reads: allowed, except credentials.
+    "read": {
+      "*": "allow",
+      "*.env": "deny",
+      "*.env.*": "deny",
+      "*.env.example": "allow",
+      "~/.aws/*": "deny",
+      "~/.oci/*": "deny",
+      "~/secret/*": "deny",
+      "~/credentials*": "deny",
+      "*creds*": "deny",
+      "*cred*.cfg": "deny",
+      "*macaroon*": "deny",
+      "*store.login*": "deny",
+      "~/.config/opencode/service.json": "deny"
+    },
+
+    "bash": {
+      // Unknown commands ask. ("deny" makes the agent fail without asking.)
+      "*": "ask",
+
+      // Read-only tools.
+      "ls": "allow",
+      "ls *": "allow",
+      "cat *": "allow",
+      "find *": "allow",
+      "grep *": "allow",
+      "rg *": "allow",
+      "head *": "allow",
+      "tail *": "allow",
+      "wc *": "allow",
+
+      // Python tooling.
+      "uv *": "allow",
+      "python *": "allow",
+      "pytest *": "allow",
+      "tox *": "allow",
+      "ruff *": "allow",
+      "mypy *": "allow",
+      "just check-coverage *": "ask",
+
+      // Spec tools.
+      "openspec": "allow",
+      "openspec *": "allow",
+      "bash .specify/scripts/bash/create-new-feature.sh *": "allow",
+      "bash .specify/scripts/bash/check-prerequisites.sh *": "allow",
+      "bash .specify/scripts/bash/setup-plan.sh *": "allow",
+      "bash .specify/scripts/bash/update-agent-context.sh *": "ask",
+
+      // git: allowed, except push and remote changes.
+      "git *": "allow",
+      "git push*": "deny",
+      "git remote set-url*": "deny",
+      "git remote add*": "deny",
+
+      // gh: reads allowed. Everything else asks (comments, reviews, api).
+      "gh *": "ask",
+      "gh pr view *": "allow",
+      "gh pr diff *": "allow",
+      "gh pr list *": "allow",
+      "gh pr checks *": "allow",
+      "gh repo view *": "allow",
+      "gh run view *": "allow",
+      "gh run list *": "allow",
+      "gh release list *": "allow",
+      "gh release view *": "allow",
+      "gh stack view*": "allow",
+      "gh api *": "ask",
+
+      // Snap: read-only info.
+      "snap info *": "allow",
+      "snap list*": "allow",
+
+      // AWS: reads allowed. Every other aws command asks.
+      "aws *": "ask",
+      "aws sts get-caller-identity*": "allow",
+      "aws * describe-*": "allow",
+      "aws * list-*": "allow",
+      "aws * get-*": "allow",
+      "aws logs tail *": "allow",
+      "aws logs filter-log-events *": "allow",
+
+      // herd shortcuts (herd/bin on PATH). Read-only.
+      "herd-help*": "allow",
+      "herd-usage*": "allow",
+
+      // herd helper scripts. All path forms.
+      "~/herd/scripts/*": "allow",
+      "$HOME/herd/scripts/*": "allow",
+      "/home/jess/herd/scripts/*": "allow",
+      "~/herd/skills/*/scripts/*": "allow",
+      "/home/jess/herd/skills/*/scripts/*": "allow",
+      "python3 ~/herd/skills/*/scripts/*": "allow",
+      "python3 /home/jess/herd/skills/*/scripts/*": "allow",
+
+      // Denies last, so that they win over the allows above.
+      "*.aws/credentials*": "deny",
+      "*.aws/config*": "deny",
+      "*creds*": "deny",
+      "*macaroon*": "deny",
+      "*store.login*": "deny",
+      "*service.json*": "deny",
+      "*~/secret/*": "deny",
+      "*/.oci/*": "deny",
+
+      // AWS writes that herd never runs.
+      "aws * put-*": "deny",
+      "aws * delete-*": "deny",
+      "aws ec2 deregister-image*": "deny",
+      "aws ec2 modify-image-attribute*": "deny",
+
+      // Writes that ask each time.
+      "make *": "ask",
+      "aws ec2 deregister-image *--profile*": "ask",
+      "aws ec2 delete-snapshot *--profile*": "ask",
+      "aws s3 rm *--profile*": "ask"
+    }
+  }
+}

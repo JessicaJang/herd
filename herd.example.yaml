@@ -1,0 +1,50 @@
+# herd.example.yaml: template. setup.sh copies it to herd.yaml (not in git). Edit herd.yaml.
+# Every skill reads it directly. README.md ("Configuration") explains each key.
+# After you change `models` or `review.tiers`, run: ~/herd/scripts/gen-agents.sh
+
+me:
+  github: ""                 # eye uses this to tell my PRs from other people's PRs
+
+# Model for each role. Use the IDs from: opencode models github-copilot
+# TODO: check that each ID below is in that list. These are placeholders.
+models:
+  triage:   github-copilot/claude-haiku-5.5      # fast, cheap: diff summary, risk label
+  code:     github-copilot/gpt-5.3-codex         # writes code
+  reviewer: github-copilot/claude-sonnet-5.5     # single reviewer for quick tier
+  judgment: github-copilot/claude-opus-5.5       # lead reviewer, teaching, synthesis
+  panel:                                         # different model families, for standard and deep
+    - github-copilot/claude-sonnet-5.5
+    - github-copilot/gpt-6.1-sol
+    - github-copilot/gemini-4-hydrogen
+
+review:
+  quick_max_lines: 200
+  standard_max_lines: 800
+  # A diff that touches any of these paths goes to the deep tier.
+  deep_paths: ["**/iam*", "**/*policy*", "**/*publish*", "**/*cred*"]
+  max_findings: 5            # findings shown in the report, most important first
+  # Which roles run in each tier. `panel.0` is the first model in models.panel.
+  tiers:
+    quick:    { reviewers: [reviewer], lead: none }
+    standard: { reviewers: [panel.0, panel.1], lead: judgment }
+    deep:     { reviewers: [panel.0, panel.1, panel.2], lead: judgment, extra: [blast-radius, spec-check] }
+
+teaching:
+  default_level: junior      # eli5 | junior | senior
+  learn_concepts_max: 3
+
+coding:
+  default_mode: driver       # driver | navigator
+
+# Work settings (local only) go here in your own herd.yaml. See work/ for their keys.
+
+budget:
+  log: ~/branches/.herd/usage.tsv
+  downgrade_when_over: true  # deep -> standard -> quick, and always tell Jess
+  # TODO: set a token limit per review after one week of usage.tsv data
+  max_tokens_per_review: null
+
+paths:
+  branches: ~/branches
+  tasks: ~/branches/.herd/tasks
+  drafts: ~/branches/.herd/drafts   # draft PR comments, never posted without approval

@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# herd-usage: show the last herd model runs from the usage log (default 10 rows).
+set -euo pipefail
+LOG="${HERD_USAGE_LOG:-$HOME/branches/.herd/usage.tsv}"
+[ -f "$LOG" ] || { echo "No usage log yet at $LOG"; exit 0; }
+{ head -1 "$LOG"; tail -n +2 "$LOG" | tail -n "${1:-10}"; } | column -t -s $'\t'
