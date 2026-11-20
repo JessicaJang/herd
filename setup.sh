@@ -32,17 +32,7 @@ for pair in "herd.example.yaml:herd.yaml" "memory.example.md:memory.md"; do
     ok "$dst made from $src. Fill in your values."
   fi
 done
-if [ -d "$HERD/work" ]; then
-  ok "work/ exists"
-  if [ -f "$HERD/work/git-exclude" ]; then
-    grep -v '^#' "$HERD/work/git-exclude" | while read -r line; do
-      grep -qxF "$line" "$HERD/.git/info/exclude" 2>/dev/null || echo "$line" >> "$HERD/.git/info/exclude"
-    done
-    ok "work paths added to .git/info/exclude"
-  fi
-else
-  skip "work/ is missing. Copy it from your private backup (it is not in git)."
-fi
+[ -d "$HERD/work" ] && ok "work/ exists" || skip "work/ is missing. Copy it from your private backup."
 
 echo "Skills (Claude Code, OpenCode, Copilot CLI):"
 link "$HERD/skills" "$HOME/.claude/skills"

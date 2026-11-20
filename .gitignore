@@ -12,3 +12,12 @@ skills/.trash/
 herd.yaml
 memory.md
 work/
+
+# Work tools and their output: local only, never in this public repo
+bin/herd-ai-findings
+ai-findings-*.rst
+
+# Editor and Python files
+*.swp
+__pycache__/
+

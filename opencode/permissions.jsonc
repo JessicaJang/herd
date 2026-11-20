@@ -20,9 +20,13 @@
       "/home/jess/branches/**": "allow"
     },
 
-    // Edits: denied, except the paths below.
+    // Edits: ask, except the paths below. Inside a repo, OpenCode matches
+    // relative paths (docs/x.rst), so absolute allows only work for outside folders.
     "edit": {
-      "*": "deny",
+      "*": "ask",
+      "docs/**": "allow",
+      "*.md": "allow",
+      "*.rst": "allow",
       "openspec/**": "allow",
       "specs/**": "allow",
       "project.md": "allow",
@@ -34,7 +38,11 @@
       ".github/**": "allow",
       "/home/jess/branches/**": "allow",
       "/home/jess/herd/**": "allow",
-      "~/herd/**": "allow"
+      "~/herd/**": "allow",
+      "*.env": "deny",
+      "*.env.*": "deny",
+      "*creds*": "deny",
+      "*token*": "deny"
     },
 
     // Reads: allowed, except credentials.

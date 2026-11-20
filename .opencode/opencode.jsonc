@@ -1,0 +1,16 @@
+// herd project config for OpenCode. It applies only when OpenCode runs inside ~/herd.
+// Inside a project, edit rules match relative paths, so the absolute
+// "/home/jess/herd/**" allow in opencode/permissions.jsonc does not match here.
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "edit": {
+      "*": "allow",
+      "**": "allow",
+      "*.env": "deny",
+      "*.env.*": "deny",
+      "*creds*": "deny",
+      "*token*": "deny"
+    }
+  }
+}
